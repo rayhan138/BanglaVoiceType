@@ -8,3 +8,10 @@ build/
 scratch/
 bin/
 config.txt
+*.exe
+*.log
+*.zip
+temp_icon.png
+convert_icon.py
+Voice type logo 02.svg
+voice bangla.png
