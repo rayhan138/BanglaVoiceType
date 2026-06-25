@@ -1,0 +1,10 @@
+build/
+.vs/
+*.obj
+*.pdb
+*.ilk
+*.suo
+*.user
+scratch/
+bin/
+config.txt

@@ -1,0 +1,39 @@
+// app.rc — Windows Resource Script
+// Embeds the application icon and DPI-awareness manifest
+
+#include <winresrc.h>
+
+#include "resource.h"
+
+// Application Icon
+IDI_APPICON ICON "app_icon.ico"
+
+// DPI-Awareness Manifest (Handled by CMake / MSVC automatically)
+// 1 RT_MANIFEST "app.manifest"
+
+// Version Information
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION     1,0,0,0
+    PRODUCTVERSION  1,0,0,0
+    FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+    FILEOS          VOS_NT_WINDOWS32
+    FILETYPE        VFT_APP
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName",      "Bangla Voice Typing"
+            VALUE "FileDescription",  "Bangla Voice Typing Keyboard"
+            VALUE "FileVersion",      "1.0.0.0"
+            VALUE "InternalName",     "BanglaVoiceTyping"
+            VALUE "OriginalFilename", "BanglaVoiceTyping.exe"
+            VALUE "ProductName",      "Bangla Voice Typing Keyboard"
+            VALUE "ProductVersion",   "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END
