@@ -79,6 +79,9 @@ constexpr int ID_TRAY_EXIT       = 2002;
 /// @brief Command ID for tray menu "Toggle Language" item.
 constexpr int ID_TRAY_LANG       = 2003;
 
+/// @brief Command ID for tray menu "Restart" item.
+constexpr int ID_TRAY_RESTART    = 2004;
+
 
 /// @class UI
 /// @brief Floating Win32 window with GDI+ rendering for the voice typing panel.

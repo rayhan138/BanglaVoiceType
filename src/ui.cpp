@@ -715,6 +715,7 @@ LRESULT UI::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam) {
                 AppendMenuW(hMenu, MF_STRING, ID_TRAY_SHOW, L"Show");
                 AppendMenuW(hMenu, MF_STRING, ID_TRAY_LANG, L"Toggle Language");
                 AppendMenuW(hMenu, MF_SEPARATOR, 0, nullptr);
+                AppendMenuW(hMenu, MF_STRING, ID_TRAY_RESTART, L"Restart");
                 AppendMenuW(hMenu, MF_STRING, ID_TRAY_EXIT, L"Exit");
 
                 // Required for the menu to disappear when clicking away.
@@ -737,6 +738,13 @@ LRESULT UI::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam) {
             case ID_TRAY_LANG:
                 PostMessageW(m_hwnd, WM_COMMAND, MAKEWPARAM(ID_BUTTON_LANG, BN_CLICKED), 0);
                 return 0;
+            case ID_TRAY_RESTART: {
+                wchar_t exePath[MAX_PATH];
+                GetModuleFileNameW(NULL, exePath, MAX_PATH);
+                ShellExecuteW(NULL, L"open", exePath, NULL, NULL, SW_SHOW);
+                PostMessageW(m_hwnd, WM_CLOSE, 0, 0);
+                return 0;
+            }
             case ID_TRAY_EXIT:
                 PostMessageW(m_hwnd, WM_CLOSE, 0, 0);
                 return 0;
