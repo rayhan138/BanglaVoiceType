@@ -790,8 +790,6 @@ void App::StartRecording() {
         m_ui->SetStatusText(L"Listening...");
         m_ui->SetResultText(L"");
         
-        m_ui->Show();
-        
         if (m_indicator) {
             m_indicator->Show(m_langMode == LanguageMode::BANGLA);
         }
