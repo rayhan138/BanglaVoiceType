@@ -79,6 +79,12 @@ public:
     /// @return true if successful, false otherwise.
     bool Save();
 
+    /// @brief Checks if Gemini API usage is enabled.
+    bool IsGeminiEnabled() const;
+
+    /// @brief Sets whether Gemini API usage is enabled.
+    void SetGeminiEnabled(bool enable);
+
 private:
     // --- Configuration Values ---
     std::wstring m_filePath;
@@ -87,6 +93,7 @@ private:
     std::wstring m_hotkey     = L"Alt+X";
     bool         m_autoPaste  = true;
     std::string  m_sttEngine  = "auto";
+    bool         m_useGemini  = true;
 
     // --- Parsing Helpers ---
     /// @brief Trims leading and trailing whitespace from a string.

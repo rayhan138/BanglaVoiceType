@@ -327,7 +327,7 @@ LRESULT CALLBACK SettingsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     }
     case WM_DRAWITEM: {
         DRAWITEMSTRUCT* dis = reinterpret_cast<DRAWITEMSTRUCT*>(lParam);
-        if (dis->CtlID == 103) { // Auto start toggle
+        if (dis->CtlID == 103 || dis->CtlID == 105) { // Auto start or Gemini toggle
             bool isChecked = (GetWindowLongPtrW(dis->hwndItem, GWLP_USERDATA) != 0);
             HDC hdc = dis->hDC;
             RECT rc = dis->rcItem;
@@ -441,11 +441,11 @@ LRESULT CALLBACK SettingsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
         break;
     }
     case WM_COMMAND: {
-        if (LOWORD(wParam) == 103) { // Toggle clicked
-            HWND hStartup = (HWND)lParam;
-            bool isChecked = (GetWindowLongPtrW(hStartup, GWLP_USERDATA) != 0);
-            SetWindowLongPtrW(hStartup, GWLP_USERDATA, !isChecked);
-            InvalidateRect(hStartup, nullptr, FALSE);
+        if (LOWORD(wParam) == 103 || LOWORD(wParam) == 105) { // Toggle clicked
+            HWND hToggle = (HWND)lParam;
+            bool isChecked = (GetWindowLongPtrW(hToggle, GWLP_USERDATA) != 0);
+            SetWindowLongPtrW(hToggle, GWLP_USERDATA, !isChecked);
+            InvalidateRect(hToggle, nullptr, FALSE);
             return 0;
         }
         if (LOWORD(wParam) == 104) { // Update button
@@ -468,6 +468,7 @@ LRESULT CALLBACK SettingsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             HWND hGroq = GetDlgItem(hwnd, 101);
             HWND hGemini = GetDlgItem(hwnd, 102);
             HWND hStartup = GetDlgItem(hwnd, 103);
+            HWND hGeminiToggle = GetDlgItem(hwnd, 105);
             wchar_t bufGroq[512] = {0};
             wchar_t bufGemini[512] = {0};
             GetWindowTextW(hGroq, bufGroq, 512);
@@ -475,10 +476,13 @@ LRESULT CALLBACK SettingsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             
             bool autoStart = (GetWindowLongPtrW(hStartup, GWLP_USERDATA) != 0);
             SetAutoStart(autoStart);
+
+            bool geminiEnabled = (GetWindowLongPtrW(hGeminiToggle, GWLP_USERDATA) != 0);
             
             App* app = reinterpret_cast<App*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
             if (app) {
                 app->UpdateApiKeys(WideToUtf8Str(bufGroq), WideToUtf8Str(bufGemini));
+                app->SetGeminiEnabled(geminiEnabled);
             }
             DestroyWindow(hwnd);
             return 0;
@@ -575,23 +579,33 @@ LRESULT CALLBACK SettingsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
         fieldPath2.CloseFigure();
         graphics.DrawPath(&fieldPen, &fieldPath2);
 
-        // ── Section 3: Run on Startup ──
-        // Rocket icon circle (purple)
-        Gdiplus::SolidBrush purpleBg(Gdiplus::Color(255, 235, 225, 250));
-        graphics.FillEllipse(&purpleBg, 20, 258, 28, 28);
-        Gdiplus::SolidBrush purpleClr(Gdiplus::Color(255, 130, 80, 200));
-        graphics.DrawString(L"\xE7C1", -1, &smallIcon, Gdiplus::RectF(20.0f, 258.0f, 28.0f, 28.0f), &cfmt, &purpleClr); // Send/rocket
+        // ── Section 3: Use Gemini API ──
+        Gdiplus::SolidBrush orangeBg(Gdiplus::Color(255, 255, 242, 225));
+        graphics.FillEllipse(&orangeBg, 20, 252, 28, 28);
+        Gdiplus::SolidBrush orangeClr(Gdiplus::Color(255, 225, 120, 30));
+        graphics.DrawString(L"\xE71D", -1, &smallIcon, Gdiplus::RectF(20.0f, 252.0f, 28.0f, 28.0f), &cfmt, &orangeClr); // VPN / Key icon
 
-        // "Run on startup" bold
-        graphics.DrawString(L"Run on startup", -1, &labelFont, Gdiplus::PointF(55.0f, 258.0f), &labelBrush);
+        graphics.DrawString(L"Use Gemini API Key", -1, &labelFont, Gdiplus::PointF(55.0f, 250.0f), &labelBrush);
 
-        // "Automatically launch with Windows" subtitle
         Gdiplus::Font subFont(&titleFam, 8.5f, Gdiplus::FontStyleRegular, Gdiplus::UnitPoint);
         Gdiplus::SolidBrush subBrush(Gdiplus::Color(255, 140, 150, 170));
-        graphics.DrawString(L"Automatically launch with Windows", -1, &subFont, Gdiplus::PointF(55.0f, 276.0f), &subBrush);
+        graphics.DrawString(L"Transcribe Bangla using Gemini (fallback to Google if off)", -1, &subFont, Gdiplus::PointF(55.0f, 268.0f), &subBrush);
+
+        // ── Section 4: Run on Startup ──
+        // Rocket icon circle (purple)
+        Gdiplus::SolidBrush purpleBg(Gdiplus::Color(255, 235, 225, 250));
+        graphics.FillEllipse(&purpleBg, 20, 302, 28, 28);
+        Gdiplus::SolidBrush purpleClr(Gdiplus::Color(255, 130, 80, 200));
+        graphics.DrawString(L"\xE7C1", -1, &smallIcon, Gdiplus::RectF(20.0f, 302.0f, 28.0f, 28.0f), &cfmt, &purpleClr); // Send/rocket
+
+        // "Run on startup" bold
+        graphics.DrawString(L"Run on startup", -1, &labelFont, Gdiplus::PointF(55.0f, 300.0f), &labelBrush);
+
+        // "Automatically launch with Windows" subtitle
+        graphics.DrawString(L"Automatically launch with Windows", -1, &subFont, Gdiplus::PointF(55.0f, 318.0f), &subBrush);
 
         // Separator before save
-        graphics.DrawLine(&sepPen, 20, 310, rc.right - 20, 310);
+        graphics.DrawLine(&sepPen, 20, 345, rc.right - 20, 345);
 
         BitBlt(hdc, 0, 0, rc.right, rc.bottom, memDC, 0, 0, SRCCOPY);
         SelectObject(memDC, oldBmp);
@@ -697,6 +711,11 @@ void App::UpdateApiKeys(const std::string& groq, const std::string& gemini) {
     m_transcriber->SetGeminiApiKey(gemini);
 }
 
+void App::SetGeminiEnabled(bool enable) {
+    m_config->SetGeminiEnabled(enable);
+    m_config->Save();
+}
+
 void App::ShowSettingsWindow() {
     WNDCLASSW wc = {};
     wc.lpfnWndProc = SettingsWndProc;
@@ -707,7 +726,7 @@ void App::ShowSettingsWindow() {
     
     RegisterClassW(&wc);
     
-    int winW = 480, winH = 450;
+    int winW = 480, winH = 480;
     int screenW = GetSystemMetrics(SM_CXSCREEN);
     int screenH = GetSystemMetrics(SM_CYSCREEN);
     
@@ -737,21 +756,28 @@ void App::ShowSettingsWindow() {
                                    WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
                                    28, 207, winW - 85, 24, hwnd, (HMENU)102, m_hInstance, nullptr);
 
+    // Gemini API Enable Toggle
+    HWND hGeminiToggle = CreateWindowExW(0, L"BUTTON", L"",
+                                         WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
+                                         winW - 80, 255, 46, 22, hwnd, (HMENU)105, m_hInstance, nullptr);
+    
+    SetWindowLongPtrW(hGeminiToggle, GWLP_USERDATA, m_config->IsGeminiEnabled() ? 1 : 0);
+
     // Auto-Start Toggle
     HWND hStartup = CreateWindowExW(0, L"BUTTON", L"",
                                     WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
-                                    winW - 80, 263, 46, 22, hwnd, (HMENU)103, m_hInstance, nullptr);
+                                    winW - 80, 305, 46, 22, hwnd, (HMENU)103, m_hInstance, nullptr);
     
     SetWindowLongPtrW(hStartup, GWLP_USERDATA, IsAutoStartEnabled() ? 1 : 0);
 
     // Save Button (owner-drawn blue pill)
     HWND hUpdate = CreateWindowExW(0, L"BUTTON", L"",
                                    WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
-                                   winW/2 - 80, 315, 160, 32, hwnd, (HMENU)104, m_hInstance, nullptr);
+                                   winW/2 - 80, 350, 160, 32, hwnd, (HMENU)104, m_hInstance, nullptr);
 
     HWND hSave = CreateWindowExW(0, L"BUTTON", L"Save",
                                  WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
-                                 winW/2 - 90, 365, 180, 40, hwnd, (HMENU)1, m_hInstance, nullptr);
+                                 winW/2 - 90, 395, 180, 40, hwnd, (HMENU)1, m_hInstance, nullptr);
                     
     SendMessageW(hGroq, WM_SETFONT, (WPARAM)hFont, TRUE);
     SendMessageW(hGemini, WM_SETFONT, (WPARAM)hFont, TRUE);
@@ -795,7 +821,7 @@ void App::StopRecordingAndTranscribe() {
     if (m_langMode == LanguageMode::ENGLISH) {
         m_transcriber->SetEngine(STTEngine::GROQ);
     } else {
-        if (!m_config->GetGeminiApiKey().empty()) {
+        if (m_config->IsGeminiEnabled() && !m_config->GetGeminiApiKey().empty()) {
             m_transcriber->SetEngine(STTEngine::GEMINI);
         } else {
             m_transcriber->SetEngine(STTEngine::GOOGLE);

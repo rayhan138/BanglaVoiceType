@@ -241,6 +241,17 @@ void Config::ParseLine(const std::string& line) {
             OutputDebugStringW(L"[Config] WARNING: Invalid STT_ENGINE value, using default (auto).\n");
         }
     }
+    else if (key == "USE_GEMINI_API") {
+        std::string lower = value;
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+            [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+
+        if (lower == "true" || lower == "1" || lower == "yes") {
+            m_useGemini = true;
+        } else if (lower == "false" || lower == "0" || lower == "no") {
+            m_useGemini = false;
+        }
+    }
     // Unrecognized keys are silently ignored for forward-compatibility
 }
 
@@ -250,6 +261,14 @@ void Config::SetGroqApiKey(const std::string& key) {
 
 void Config::SetGeminiApiKey(const std::string& key) {
     m_geminiApiKey = key;
+}
+
+bool Config::IsGeminiEnabled() const {
+    return m_useGemini;
+}
+
+void Config::SetGeminiEnabled(bool enable) {
+    m_useGemini = enable;
 }
 
 bool Config::Save() {
@@ -269,6 +288,9 @@ bool Config::Save() {
 
     out << "# Google AI Studio (Gemini) API Key\n";
     out << "GEMINI_API_KEY=" << m_geminiApiKey << "\n\n";
+
+    out << "# Use Gemini API key for Bangla (true) or fallback to Google Web Speech API (false)\n";
+    out << "USE_GEMINI_API=" << (m_useGemini ? "true" : "false") << "\n\n";
 
     out << "# Global Hotkey to start/stop recording\n";
     out << "HOTKEY=Alt+X\n\n";

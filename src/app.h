@@ -93,6 +93,9 @@ public:
     /// @brief Updates the API keys and saves config.
     void UpdateApiKeys(const std::string& groq, const std::string& gemini);
 
+    /// @brief Sets whether Gemini is enabled and saves config.
+    void SetGeminiEnabled(bool enable);
+
     // ─── Accessors ───────────────────────────────────────────────────────
 
     /// @brief Returns the HWND of the main UI window.
