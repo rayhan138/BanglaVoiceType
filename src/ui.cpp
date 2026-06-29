@@ -182,6 +182,7 @@ bool UI::Create() {
 
 void UI::Show() {
     if (!m_hwnd) return;
+    SetWindowPos(m_hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
     ShowWindow(m_hwnd, SW_SHOWNOACTIVATE);
     InvalidateRect(m_hwnd, nullptr, TRUE);
     UpdateWindow(m_hwnd);   // Force immediate synchronous paint — no black flash.

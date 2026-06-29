@@ -54,6 +54,31 @@ void Indicator::Show(bool isBangla) {
     m_isBangla = isBangla;
     m_redDotVisible = true;
     
+    // Position on active monitor (where the mouse cursor is)
+    POINT pt = {};
+    GetCursorPos(&pt);
+    HMONITOR hMonitor = MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST);
+    MONITORINFO mi = { sizeof(MONITORINFO) };
+    
+    int screenW = GetSystemMetrics(SM_CXSCREEN);
+    int screenH = GetSystemMetrics(SM_CYSCREEN);
+    int left = 0;
+    int top = 0;
+    
+    if (GetMonitorInfoW(hMonitor, &mi)) {
+        screenW = mi.rcWork.right - mi.rcWork.left;
+        screenH = mi.rcWork.bottom - mi.rcWork.top;
+        left = mi.rcWork.left;
+        top = mi.rcWork.top;
+    }
+    
+    int width = 70;
+    int height = 28;
+    int posX = left + screenW / 2 - width / 2;
+    int posY = top + screenH - height - 80;
+
+    SetWindowPos(m_hwnd, HWND_TOPMOST, posX, posY, width, height, SWP_NOACTIVATE | SWP_SHOWWINDOW);
+    
     // Start blinking timer (every 500ms)
     m_timerId = SetTimer(m_hwnd, 1, 500, nullptr);
     
