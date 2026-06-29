@@ -311,6 +311,35 @@ void App::ShowWelcomeWindow() {
 // ─── Settings Window WndProc ─────────────────────────────────────────────
 LRESULT CALLBACK SettingsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
+    case WM_SETCURSOR: {
+        POINT pt;
+        GetCursorPos(&pt);
+        ScreenToClient(hwnd, &pt);
+        if (pt.x >= 235 && pt.x <= 253 && pt.y >= 169 && pt.y <= 187) {
+            SetCursor(LoadCursorW(nullptr, IDC_HAND));
+            return TRUE;
+        }
+        break;
+    }
+    case WM_LBUTTONDOWN: {
+        int x = LOWORD(lParam);
+        int y = HIWORD(lParam);
+        if (x >= 235 && x <= 253 && y >= 169 && y <= 187) {
+            int ret = MessageBoxW(hwnd,
+                L"To get a free Google Gemini API Key:\n\n"
+                L"1. Sign in with your Google account.\n"
+                L"2. Click 'Create API Key'.\n"
+                L"3. Copy the key and paste it in the Gemini box.\n\n"
+                L"Would you like to open Google AI Studio in your browser now?",
+                L"How to Get Gemini API Key",
+                MB_YESNO | MB_ICONINFORMATION | MB_DEFBUTTON1);
+            if (ret == IDYES) {
+                ShellExecuteW(nullptr, L"open", L"https://aistudio.google.com/app/apikey", nullptr, nullptr, SW_SHOWNORMAL);
+            }
+            return 0;
+        }
+        break;
+    }
     case WM_CTLCOLORSTATIC: {
         HDC hdcStatic = (HDC)wParam;
         SetTextColor(hdcStatic, RGB(26, 32, 44));
@@ -568,6 +597,17 @@ LRESULT CALLBACK SettingsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
         graphics.DrawString(L"\x0985", -1, &bnIcon, Gdiplus::RectF(20.0f, 165.0f, 28.0f, 28.0f), &cfmt, &greenClr); // Bengali letter
 
         graphics.DrawString(L"Gemini API Key (Bangla)", -1, &labelFont, Gdiplus::PointF(55.0f, 170.0f), &labelBrush);
+
+        // Draw (?) help button next to Gemini label
+        Gdiplus::SolidBrush helpBg(Gdiplus::Color(255, 230, 235, 245));
+        graphics.FillEllipse(&helpBg, 235, 169, 18, 18);
+        Gdiplus::FontFamily helpFam(L"Inter");
+        Gdiplus::Font helpFont(&helpFam, 8.5f, Gdiplus::FontStyleBold, Gdiplus::UnitPoint);
+        Gdiplus::SolidBrush helpClr(Gdiplus::Color(255, 100, 110, 130));
+        Gdiplus::StringFormat helpFmt;
+        helpFmt.SetAlignment(Gdiplus::StringAlignmentCenter);
+        helpFmt.SetLineAlignment(Gdiplus::StringAlignmentCenter);
+        graphics.DrawString(L"?", -1, &helpFont, Gdiplus::RectF(235.0f, 169.0f, 18.0f, 18.0f), &helpFmt, &helpClr);
 
         // Input field border 2
         Gdiplus::GraphicsPath fieldPath2;
