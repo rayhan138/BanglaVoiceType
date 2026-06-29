@@ -521,6 +521,12 @@ LRESULT CALLBACK SettingsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
         Gdiplus::SolidBrush titleBrush(Gdiplus::Color(255, 20, 30, 50));
         graphics.DrawString(L"API Settings", -1, &titleFont, Gdiplus::PointF(60.0f, 22.0f), &titleBrush);
 
+        // App Version
+        Gdiplus::Font versionFont(&titleFam, 9.5f, Gdiplus::FontStyleBold, Gdiplus::UnitPoint);
+        Gdiplus::SolidBrush versionBrush(Gdiplus::Color(255, 160, 170, 190));
+        std::wstring wVer(Updater::CURRENT_VERSION.begin(), Updater::CURRENT_VERSION.end());
+        graphics.DrawString(wVer.c_str(), -1, &versionFont, Gdiplus::PointF(rc.right - 65.0f, 28.0f), &versionBrush);
+
         // Separator line under title
         Gdiplus::Pen sepPen(Gdiplus::Color(255, 235, 240, 250), 1.0f);
         graphics.DrawLine(&sepPen, 20, 60, rc.right - 20, 60);
@@ -789,7 +795,11 @@ void App::StopRecordingAndTranscribe() {
     if (m_langMode == LanguageMode::ENGLISH) {
         m_transcriber->SetEngine(STTEngine::GROQ);
     } else {
-        m_transcriber->SetEngine(STTEngine::GOOGLE);
+        if (!m_config->GetGeminiApiKey().empty()) {
+            m_transcriber->SetEngine(STTEngine::GEMINI);
+        } else {
+            m_transcriber->SetEngine(STTEngine::GOOGLE);
+        }
     }
 
     m_transcriber->TranscribeAsync(pcmData, m_ui->GetHandle());
