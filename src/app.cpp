@@ -315,7 +315,7 @@ LRESULT CALLBACK SettingsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
         POINT pt;
         GetCursorPos(&pt);
         ScreenToClient(hwnd, &pt);
-        if (pt.x >= 235 && pt.x <= 255 && pt.y >= 168 && pt.y <= 188) {
+        if (pt.x >= 230 && pt.x <= 298 && pt.y >= 168 && pt.y <= 188) {
             SetCursor(LoadCursorW(nullptr, IDC_HAND));
             return TRUE;
         }
@@ -324,7 +324,7 @@ LRESULT CALLBACK SettingsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     case WM_LBUTTONDOWN: {
         int x = LOWORD(lParam);
         int y = HIWORD(lParam);
-        if (x >= 235 && x <= 255 && y >= 168 && y <= 188) {
+        if (x >= 230 && x <= 298 && y >= 168 && y <= 188) {
             int ret = MessageBoxW(hwnd,
                 L"To get a free Google Gemini API Key:\n\n"
                 L"1. Sign in with your Google account.\n"
@@ -598,20 +598,26 @@ LRESULT CALLBACK SettingsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 
         graphics.DrawString(L"Gemini API Key (Bangla)", -1, &labelFont, Gdiplus::PointF(55.0f, 170.0f), &labelBrush);
 
-        // Draw (?) help button next to Gemini label (attention grabbing gold)
-        Gdiplus::SolidBrush helpBg(Gdiplus::Color(255, 255, 244, 215));
-        graphics.FillEllipse(&helpBg, 235, 168, 20, 20);
-        
-        Gdiplus::Pen helpPen(Gdiplus::Color(255, 245, 190, 80), 1.0f);
-        graphics.DrawEllipse(&helpPen, 235, 168, 20, 20);
-        
+        // Draw "GET KEY" capsule badge (ultimate attention grabber!)
+        int bX = 230, bY = 168, bW = 68, bH = 20;
+        int bR = bH / 2;
+        Gdiplus::GraphicsPath badgePath;
+        badgePath.AddArc(bX, bY, bR * 2, bR * 2, 180, 90);
+        badgePath.AddArc(bX + bW - bR * 2, bY, bR * 2, bR * 2, 270, 90);
+        badgePath.AddArc(bX + bW - bR * 2, bY + bH - bR * 2, bR * 2, bR * 2, 0, 90);
+        badgePath.AddArc(bX, bY + bH - bR * 2, bR * 2, bR * 2, 90, 90);
+        badgePath.CloseFigure();
+
+        Gdiplus::SolidBrush badgeBg(Gdiplus::Color(255, 239, 68, 68)); // Vibrant material red
+        graphics.FillPath(&badgeBg, &badgePath);
+
         Gdiplus::FontFamily helpFam(L"Inter");
-        Gdiplus::Font helpFont(&helpFam, 9.5f, Gdiplus::FontStyleBold, Gdiplus::UnitPoint);
-        Gdiplus::SolidBrush helpClr(Gdiplus::Color(255, 210, 110, 0));
+        Gdiplus::Font helpFont(&helpFam, 8.0f, Gdiplus::FontStyleBold, Gdiplus::UnitPoint);
+        Gdiplus::SolidBrush whiteBrush(Gdiplus::Color(255, 255, 255, 255));
         Gdiplus::StringFormat helpFmt;
         helpFmt.SetAlignment(Gdiplus::StringAlignmentCenter);
         helpFmt.SetLineAlignment(Gdiplus::StringAlignmentCenter);
-        graphics.DrawString(L"?", -1, &helpFont, Gdiplus::RectF(235.0f, 168.0f, 20.0f, 20.0f), &helpFmt, &helpClr);
+        graphics.DrawString(L"GET KEY", -1, &helpFont, Gdiplus::RectF(bX, bY, bW, bH), &helpFmt, &whiteBrush);
 
         // Input field border 2
         Gdiplus::GraphicsPath fieldPath2;
