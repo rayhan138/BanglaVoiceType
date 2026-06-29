@@ -1,3 +1,10 @@
 // resource.h
 
 #define IDI_APPICON 101
+
+#define IDR_FONT_HIND_REGULAR   301
+#define IDR_FONT_HIND_BOLD      302
+#define IDR_FONT_INTER_REGULAR  303
+#define IDR_FONT_INTER_BOLD     304
+#define IDR_FONT_INTER_SEMIBOLD 305
+#define IDR_PNG_LOGO            201

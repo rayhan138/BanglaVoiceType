@@ -118,23 +118,5 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/config.txt"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>/config.txt"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_SOURCE_DIR}/voice bangla.png"
-        "$<TARGET_FILE_DIR:${PROJECT_NAME}>/VoiceBangla.png"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_SOURCE_DIR}/fonts/HindSiliguri-Regular.ttf"
-        "$<TARGET_FILE_DIR:${PROJECT_NAME}>/HindSiliguri-Regular.ttf"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_SOURCE_DIR}/fonts/HindSiliguri-Bold.ttf"
-        "$<TARGET_FILE_DIR:${PROJECT_NAME}>/HindSiliguri-Bold.ttf"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_SOURCE_DIR}/fonts/Inter-Regular.ttf"
-        "$<TARGET_FILE_DIR:${PROJECT_NAME}>/Inter-Regular.ttf"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_SOURCE_DIR}/fonts/Inter-Bold.ttf"
-        "$<TARGET_FILE_DIR:${PROJECT_NAME}>/Inter-Bold.ttf"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_SOURCE_DIR}/fonts/Inter-SemiBold.ttf"
-        "$<TARGET_FILE_DIR:${PROJECT_NAME}>/Inter-SemiBold.ttf"
-    COMMENT "Copying config, logo, and fonts to output directory"
+    COMMENT "Copying config.txt to output directory"
 )

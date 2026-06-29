@@ -6,6 +6,7 @@
 #include "ui.h"
 
 #include <string>
+#include <memory>
 #include <algorithm>
 #include <cmath>
 
@@ -59,34 +60,41 @@ UI::~UI() {
 }
 
 void UI::LoadCustomFonts() {
-    const wchar_t* fontFiles[] = {
-        L"HindSiliguri-Regular.ttf",
-        L"HindSiliguri-Bold.ttf",
-        L"Inter-Regular.ttf",
-        L"Inter-Bold.ttf",
-        L"Inter-SemiBold.ttf"
+    int resourceIds[] = {
+        IDR_FONT_HIND_REGULAR,
+        IDR_FONT_HIND_BOLD,
+        IDR_FONT_INTER_REGULAR,
+        IDR_FONT_INTER_BOLD,
+        IDR_FONT_INTER_SEMIBOLD
     };
-    for (const auto& f : fontFiles) {
-        if (AddFontResourceExW(f, FR_PRIVATE, 0)) {
-            m_fontsLoaded++;
-            OutputDebugStringW((std::wstring(L"[UI] Loaded font: ") + f + L"\n").c_str());
+    for (int resId : resourceIds) {
+        HRSRC hRes = FindResourceW(m_hInstance, MAKEINTRESOURCEW(resId), RT_RCDATA);
+        if (hRes) {
+            HGLOBAL hGlobal = LoadResource(m_hInstance, hRes);
+            if (hGlobal) {
+                void* pData = LockResource(hGlobal);
+                DWORD size = SizeofResource(m_hInstance, hRes);
+                DWORD numFonts = 0;
+                HANDLE hFont = AddFontMemResourceEx(pData, size, nullptr, &numFonts);
+                if (hFont) {
+                    m_fontHandles.push_back(hFont);
+                    m_fontsLoaded++;
+                } else {
+                    OutputDebugStringW(L"[UI] WARN: AddFontMemResourceEx failed.\n");
+                }
+            }
         } else {
-            OutputDebugStringW((std::wstring(L"[UI] WARN: Could not load font: ") + f + L"\n").c_str());
+            OutputDebugStringW(L"[UI] WARN: FindResourceW for font failed.\n");
         }
     }
 }
 
 void UI::UnloadCustomFonts() {
-    const wchar_t* fontFiles[] = {
-        L"HindSiliguri-Regular.ttf",
-        L"HindSiliguri-Bold.ttf",
-        L"Inter-Regular.ttf",
-        L"Inter-Bold.ttf",
-        L"Inter-SemiBold.ttf"
-    };
-    for (const auto& f : fontFiles) {
-        RemoveFontResourceExW(f, FR_PRIVATE, 0);
+    for (HANDLE hFont : m_fontHandles) {
+        RemoveFontMemResourceEx(hFont);
     }
+    m_fontHandles.clear();
+    m_fontsLoaded = 0;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -103,7 +111,7 @@ bool UI::Create() {
     wc.cbWndExtra    = 0;
     wc.hInstance     = m_hInstance;
     wc.hCursor       = LoadCursorW(nullptr, IDC_ARROW);
-    wc.hbrBackground = nullptr;   // We paint everything ourselves.
+    wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);   // White flash instead of black during first paint.
     wc.lpszClassName = WINDOW_CLASS_NAME;
 
     // Try to load the app icon from the resource file.
@@ -133,7 +141,7 @@ bool UI::Create() {
         WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE, // No activate = no focus stealing
         WINDOW_CLASS_NAME,
         L"Bangla Voice Typing",
-        WS_POPUP | WS_VISIBLE,
+        WS_POPUP,
         posX, posY, WINDOW_WIDTH, WINDOW_HEIGHT,
         nullptr,        // No parent
         nullptr,        // No menu
@@ -176,6 +184,7 @@ void UI::Show() {
     if (!m_hwnd) return;
     ShowWindow(m_hwnd, SW_SHOWNOACTIVATE);
     InvalidateRect(m_hwnd, nullptr, TRUE);
+    UpdateWindow(m_hwnd);   // Force immediate synchronous paint — no black flash.
 }
 
 void UI::Hide() {
@@ -305,6 +314,35 @@ void UI::RemoveTrayIcon() {
 //  Rendering — OnPaint (GDI+)
 // ═══════════════════════════════════════════════════════════════════════════════
 
+static Gdiplus::Image* LoadImageFromResource(HINSTANCE hInst, int resId) {
+    HRSRC hRes = FindResourceW(hInst, MAKEINTRESOURCEW(resId), RT_RCDATA);
+    if (!hRes) return nullptr;
+
+    HGLOBAL hGlobal = LoadResource(hInst, hRes);
+    if (!hGlobal) return nullptr;
+
+    void* pData = LockResource(hGlobal);
+    DWORD size = SizeofResource(hInst, hRes);
+
+    HGLOBAL hBuffer = GlobalAlloc(GMEM_MOVEABLE, size);
+    if (!hBuffer) return nullptr;
+
+    void* pBuffer = GlobalLock(hBuffer);
+    if (pBuffer) {
+        CopyMemory(pBuffer, pData, size);
+        GlobalUnlock(hBuffer);
+    }
+
+    IStream* pStream = nullptr;
+    if (CreateStreamOnHGlobal(hBuffer, TRUE, &pStream) == S_OK) {
+        Gdiplus::Image* pImage = Gdiplus::Image::FromStream(pStream);
+        pStream->Release();
+        return pImage;
+    }
+    GlobalFree(hBuffer);
+    return nullptr;
+}
+
 void UI::OnPaint(HDC hdc) {
     Gdiplus::Graphics graphics(hdc);
     graphics.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
@@ -325,8 +363,10 @@ void UI::OnPaint(HDC hdc) {
 
     // ── 2. Top-left Logo + Title ────────────────────────────────────────
     {
-        Gdiplus::Image logo(L"VoiceBangla.png");
-        graphics.DrawImage(&logo, 18, 14, 28, 28);
+        std::unique_ptr<Gdiplus::Image> logo(LoadImageFromResource(m_hInstance, IDR_PNG_LOGO));
+        if (logo) {
+            graphics.DrawImage(logo.get(), 18, 14, 28, 28);
+        }
 
         Gdiplus::FontFamily bnFam(L"Hind Siliguri");
         Gdiplus::Font bnFont(&bnFam, 13.0f, Gdiplus::FontStyleBold, Gdiplus::UnitPoint);

@@ -8,8 +8,15 @@
 // Application Icon
 IDI_APPICON ICON "app_icon.ico"
 
-// DPI-Awareness Manifest (Handled by CMake / MSVC automatically)
-// 1 RT_MANIFEST "app.manifest"
+// Embedded Fonts
+IDR_FONT_HIND_REGULAR   RCDATA "../fonts/HindSiliguri-Regular.ttf"
+IDR_FONT_HIND_BOLD      RCDATA "../fonts/HindSiliguri-Bold.ttf"
+IDR_FONT_INTER_REGULAR  RCDATA "../fonts/Inter-Regular.ttf"
+IDR_FONT_INTER_BOLD     RCDATA "../fonts/Inter-Bold.ttf"
+IDR_FONT_INTER_SEMIBOLD RCDATA "../fonts/Inter-SemiBold.ttf"
+
+// Embedded Logo
+IDR_PNG_LOGO            RCDATA "../voice bangla.png"
 
 // Version Information
 VS_VERSION_INFO VERSIONINFO

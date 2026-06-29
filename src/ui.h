@@ -7,6 +7,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <windows.h>
 #include <shellapi.h>
 #include <gdiplus.h>
@@ -168,6 +169,7 @@ private:
 
     // ─── Custom font handles ─────────────────────────────────────────
     int m_fontsLoaded = 0;            ///< Number of private fonts loaded
+    std::vector<HANDLE> m_fontHandles;
 
     // ─── Animation state ─────────────────────────────────────────────
     UINT_PTR m_animTimerId = 0;       ///< Timer for wave animation
