@@ -121,7 +121,7 @@ void Transcriber::TranscribeAsync(const std::vector<int16_t>& pcmData,
         }
 
         // ----- Fallback to Google -----
-        if (!ok && (engine == STTEngine::GOOGLE || engine == STTEngine::GEMINI || engine == STTEngine::AUTO))
+        if (!ok && (engine == STTEngine::GOOGLE || engine == STTEngine::AUTO))
         {
             ok = TranscribeWithGoogle(wavData);
         }
