@@ -10,7 +10,7 @@
 
 using json = nlohmann::json;
 
-const std::string Updater::CURRENT_VERSION = "v1.0.1";
+const std::string Updater::CURRENT_VERSION = "v1.0.2";
 static constexpr const wchar_t* USER_AGENT = L"BanglaVoiceTyping/1.0";
 
 static std::wstring Utf8ToWide(const std::string& str) {
